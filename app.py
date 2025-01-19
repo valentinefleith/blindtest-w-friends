@@ -1,6 +1,7 @@
 import streamlit as st
 import sqlite3
 import random
+from pytubefix import YouTube
 
 # Initialize database connection
 def init_db():
@@ -34,13 +35,21 @@ def get_random_song(conn):
         return random.choice(songs)
     return None
 
+# Extract video title from YouTube link
+def get_video_title(youtube_link):
+    try:
+        yt = YouTube(youtube_link)
+        return yt.title
+    except Exception as e:
+        return "Unknown Title (Invalid Link)"
+
 # Streamlit interface
 def main():
     st.title("Song Collector with Player")
     conn = init_db()
 
     # Navigation
-    pages = ["Add a Song", "Random Song"]
+    pages = ["Add a Song", "Random Song", "Information"]
     page = st.sidebar.selectbox("Choose a page", pages)
 
     if page == "Add a Song":
@@ -77,6 +86,16 @@ def main():
                     st.write(f"[Open the song here]({random_song})")
             else:
                 st.warning("No songs in the database yet. Add some first!")
+    elif page == "Information":
+        st.header("Database Information")
+        st.subheader("List of Songs")
+        all_songs = get_all_songs(conn)
+        if all_songs:
+            for i, link in enumerate(all_songs, start=1):
+                title = get_video_title(link)
+                st.write(f"{i}. {title} ({link})")
+        else:
+            st.warning("No songs in the database yet.")
 
 if __name__ == "__main__":
     main()
