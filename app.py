@@ -33,7 +33,7 @@ def get_all_songs(conn):
 
 # Get a random song
 def get_random_song(conn):
-    songs = get_all_songs(conn)
+    songs = [song[0] for song in get_all_songs(conn)]
     if songs:
         return random.choice(songs)
     return None
